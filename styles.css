@@ -1,3 +1,50 @@
 .mdl-card--full-width{
   width:100%;
 }
+.floating-add{
+	position: fixed;
+	bottom:2em;
+	right:2em;
+}
+.engine-top-right{
+	position: absolute;
+	top:1em;
+	right:1em;
+	z-index:2;
+}
+.train-background {
+	background:url('img/ic_train_black_48dp_2x.png') rgb(255,215,64) no-repeat center center;
+	min-height:96px;
+}
+.zero-line{
+	position: relative;
+}
+.throttle .mdl-slider__background-lower{
+	background:rgba(0,0,0,.26);
+}
+.zero-line:after {
+    content:"";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: calc(50% - 2px);
+    width:0;
+    border: 2px solid #3f51b5;
+}
+.edit-hide{
+	visibility: visible;
+	display: block;
+}
+.edit-show{
+	visibility: hidden;
+	display: none;
+}
+.editting .edit-hide{
+	visibility: hidden;
+	display: none;
+}
+.editting .edit-show{
+	visibility: visible;
+	display: block;
+}

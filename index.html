@@ -12,19 +12,20 @@
     <link rel="stylesheet" href="mdl/material.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
-    #view-source {
-      position: fixed;
-      display: block;
-      right: 0;
-      bottom: 0;
-      margin-right: 40px;
-      margin-bottom: 40px;
-      z-index: 900;
-    }
+      #view-source {
+          position: fixed;
+          display: block;
+          right: 0;
+          bottom: 0;
+          margin-right: 40px;
+          margin-bottom: 40px;
+          z-index: 900;
+      }
+
     </style>
   </head>
   <body>
-    <div class="mdl-layout mdl-js-layout">
+    <div id="commanderApp" class="mdl-layout mdl-js-layout">
       <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
           <!-- Title -->
@@ -33,44 +34,62 @@
           <div class="mdl-layout-spacer"></div>
           <!-- Navigation -->
           <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" href="">Link</a>
-            <a class="mdl-navigation__link" href="">Link</a>
-            <a class="mdl-navigation__link" href="">Link</a>
-            <a class="mdl-navigation__link" href="">Link</a>
+            <!-- a class="mdl-navigation__link" href="">
+              Settings
+            </a -->
           </nav>
         </div>
       </header>
       <div class="mdl-layout__drawer">
-        <span class="mdl-layout-title">Title</span>
+        <span class="mdl-layout-title">TrainMQTT</span>
         <nav class="mdl-navigation">
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
-          <a class="mdl-navigation__link" href="">Link</a>
         </nav>
       </div>
       <main class="mdl-layout__content">
-        <div class="mdl-grid">
-          <div class="mdl-cell mdl-cell--6-col">
-            <div class="mdl-card mdl-shadow--2dp mdl-card--full-width">
-              <div class="mdl-card__title mdl-card--expand">
-                <h4 class="mdl-card__title-text">#6308</h4>
-
+        <div id="engineList" class="mdl-grid">
+          <div class="mdl-cell mdl-cell--4-col-tablet mdl-cell--12-col-phone mdl-cell--4-col-desktop" v-for="engine in engines">
+            <div id="engine-{{engine._id}}" class="mdl-card mdl-shadow--2dp mdl-card--full-width">
+              <div class="mdl-card__title train-background">
+                
+                <h3 class="mdl-card__title-text">
+                  <span class="edit-hide">
+                    {{engine.address}}
+                  </span>
+                  <span class="edit-show">
+                    <div class="mdl-textfield mdl-js-textfield">
+                      <input class="mdl-textfield__input" v-model="engine.address" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="engineAddress{{engine._id}}" v-on:change="updateEngine(engine)">
+                      <label class="mdl-textfield__label" for="engineAddress{{engine._id}}">Address...</label>
+                      <span class="mdl-textfield__error">Not a valid address.</span>
+                    </div>
+                  </span>
+                </h3>
+                <div class="engine-top-right">
+                  <button v-on:click="toggleEdit(engine._id)" class="edit-hide mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                      Edit
+                  </button>
+                  <button v-on:click="toggleEdit(engine._id)" class="edit-show mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                      Done
+                  </button>
+                </div>
               </div>
 
               <div class="mdl-card__actions mdl-card--border">
                 <!-- Default Slider -->
-                
-                <input class="mdl-slider mdl-js-slider" type="range"
-                  min="-128" max="128" value="0" tabindex="0">
+                <div class="throttle">
+                  <p class="zero-line">
+                  <input class="mdl-slider mdl-js-slider" type="range"
+                  min="-1" max="1" v-model="engine.throttle" tabindex="0" step=".01" v-on:input="setThrottle($event, engine)">
+                  </p>
+                  <div class="mdl-typography--caption-color-contrast mdl-typography--text-center">Throttle</div>
+                </div>
 
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
                   <div class="mdl-grid">
                     <div class="mdl-cell mdl-cell--3-col">
                       Light
-                  <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
-                    <input type="checkbox" id="switch-1" class="mdl-switch__input" checked>
+                  <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="function{{$index}}{{engine._id}}">
+                    <input type="checkbox" id="function{{$index}}{{engine._id}}" class="mdl-switch__input" checked>
                     <span class="mdl-switch__label"></span>
 
                   </label>
@@ -80,8 +99,26 @@
             </div>
           </div>
         </div>
+        <div class="floating-add">
+          <button id="addCommandControl" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+            <i class="material-icons">add</i>
+          </button>
+
+          <ul class="mdl-menu mdl-menu--top-right mdl-js-menu mdl-js-ripple-effect"
+              data-mdl-for="addCommandControl">
+            <li class="mdl-menu__item" v-on:click="newEngine">Engine</li>
+            <li class="mdl-menu__item">Accessory</li>
+            <li class="mdl-menu__item">Turnout</li>
+          </ul>
+        </div>
+
       </main>
     </div>
-    <script src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+    <script src="https://code.getmdl.io/1.1.3/material.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/TrainMQTT.js"></script>
+    <script src="js/axios.min.js"></script>
+    <script src="js/mqttws31.js"></script>
+    <script src="js/app.js"></script>
   </body>
 </html>
